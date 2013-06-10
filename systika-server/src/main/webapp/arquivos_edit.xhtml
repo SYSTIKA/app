@@ -1,0 +1,54 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets" template="/template/main.xhtml">
+
+	<ui:define name="body">
+		<h:form prependId="false">
+
+			<p:toolbar>
+				<p:toolbarGroup align="left">
+					<p:commandButton value="#{messages['button.save']}" action="#{arquivosEditMB.insert}"
+						rendered="#{!arquivosEditMB.updateMode}" ajax="false" />
+					<p:commandButton value="#{messages['button.save']}" action="#{arquivosEditMB.update}"
+						rendered="#{arquivosEditMB.updateMode}" ajax="false" />
+					<p:commandButton value="#{messages['button.delete']}" onclick="confirmation.show()"
+						rendered="#{arquivosEditMB.updateMode}" type="button" immediate="true" ajax="false" />
+					<p:confirmDialog message="#{messages['label.confirm.delete']}"
+						header="#{messages['label.dialog.delete']}" severity="alert" widgetVar="confirmation">
+						<h:commandButton value="#{messages['button.dialog.yes']}" action="#{arquivosEditMB.delete}" immediate="true"
+							 />
+						<h:commandButton value="#{messages['button.dialog.no']}" onclick="confirmation.hide()" type="button" />
+					</p:confirmDialog>
+				</p:toolbarGroup>
+			</p:toolbar>
+
+			<br />
+
+			<p:fieldset legend="#{messages['arquivos.label']}" toggleable="true" toggleSpeed="500">
+				<h:panelGrid id="fields" columns="3">
+
+					<h:outputLabel value="#{messages['arquivos.label.id']}: " for="id" styleClass="text-input" />
+					<h:outputText id="id" value="#{arquivosEditMB.bean.id}" />
+					<p:message for="id" />
+
+					<h:outputLabel value="#{messages['arquivos.label.hash']}: " for="hash" styleClass="text-input" />
+					<h:inputText id="hash" value="#{arquivosEditMB.bean.hash}"
+						title="#{messages['arquivos.alt.hash']}" />
+					<p:message for="hash" />
+
+					<h:outputLabel value="#{messages['arquivos.label.local']}: " for="local" styleClass="text-input" />
+					<h:inputText id="local" value="#{arquivosEditMB.bean.local}"
+						title="#{messages['arquivos.alt.local']}" />
+					<p:message for="local" />
+
+					<h:outputLabel value="#{messages['arquivos.label.metadata']}: " for="metadata" styleClass="text-input" />
+					<h:inputText id="metadata" value="#{arquivosEditMB.bean.metadata}"
+						title="#{messages['arquivos.alt.metadata']}" />
+					<p:message for="metadata" />
+
+				</h:panelGrid>
+			</p:fieldset>
+		</h:form>
+	</ui:define>
+</ui:composition>

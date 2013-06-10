@@ -1,0 +1,64 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets" template="/template/main.xhtml">
+
+	<ui:define name="body">
+		<h:form>
+			<p:toolbar>
+				<p:toolbarGroup align="left">
+					<p:commandButton title="#{messages['button.new']}" image="ui-icon-document" action="#{arquivosListMB.getNextView}"
+						actionListener="#{arquivosListMB.clear}" ajax="false" />
+
+					<p:commandButton title="#{messages['button.delete']}" image="ui-icon-trash" onclick="confirmation.show()"
+						type="button" immediate="true" ajax="false" />
+
+					<p:confirmDialog message="#{messages['label.confirm.delete']}" 
+						header="#{messages['label.dialog.alert']}!" severity="alert" widgetVar="confirmation">
+
+						<h:commandButton value="#{messages['button.dialog.yes']}" action="#{arquivosListMB.deleteSelection}"
+							actionListener="#{arquivosListMB.clear}" />
+						<h:commandButton value="#{messages['button.dialog.no']}" onclick="confirmation.hide()" type="button" />
+					</p:confirmDialog>
+				</p:toolbarGroup>
+			</p:toolbar>
+			<p:dataTable id="list" var="bean" value="#{arquivosListMB.resultList}">
+				<f:facet name="header">#{messages['arquivos.list.table.title']}</f:facet>
+				<p:column style="width:1%;">
+					<h:selectBooleanCheckbox value="#{arquivosListMB.selection[bean.id]}"></h:selectBooleanCheckbox>
+				</p:column>
+
+				<p:column style="width:5%;" sortBy="#{bean.id}">
+					<f:facet name="header">#{messages['arquivos.label.id']}</f:facet>
+					<h:outputText value="#{bean.id}" />
+				</p:column>
+
+				<p:column sortBy="#{bean.hash}">
+					<f:facet name="header">#{messages['arquivos.label.hash']}</f:facet>
+					<h:commandLink action="#{arquivosListMB.getNextView}" actionListener="#{arquivosListMB.clear}">
+						<h:outputText value="#{bean.hash}" />
+						<f:param name="id" value="#{bean.id}" />
+					</h:commandLink>
+				</p:column>
+
+				<p:column sortBy="#{bean.local}">
+					<f:facet name="header">#{messages['arquivos.label.local']}</f:facet>
+					<h:commandLink action="#{arquivosListMB.getNextView}" actionListener="#{arquivosListMB.clear}">
+						<h:outputText value="#{bean.local}" />
+						<f:param name="id" value="#{bean.id}" />
+					</h:commandLink>
+				</p:column>
+
+				<p:column sortBy="#{bean.metadata}">
+					<f:facet name="header">#{messages['arquivos.label.metadata']}</f:facet>
+					<h:commandLink action="#{arquivosListMB.getNextView}" actionListener="#{arquivosListMB.clear}">
+						<h:outputText value="#{bean.metadata}" />
+						<f:param name="id" value="#{bean.id}" />
+					</h:commandLink>
+				</p:column>
+
+			</p:dataTable>
+		</h:form>
+
+	</ui:define>
+</ui:composition>
