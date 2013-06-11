@@ -8,6 +8,8 @@ import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -21,29 +23,30 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author 70744416353
  */
 @Entity
-@Table(catalog = "systika", schema = "public")
+@Table(catalog = "systika", schema = "public", name = "arquivos")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Arquivos.findAll", query = "SELECT a FROM Arquivos a"),
     @NamedQuery(name = "Arquivos.findById", query = "SELECT a FROM Arquivos a WHERE a.id = :id"),
-    @NamedQuery(name = "Arquivos.findByHash", query = "SELECT a FROM Arquivos a WHERE a.hash = :hash"),
+    @NamedQuery(name = "Arquivos.findByHash", query = "SELECT a FROM Arquivos a WHERE a.hashfile = :hashfile"),
     @NamedQuery(name = "Arquivos.findByLocal", query = "SELECT a FROM Arquivos a WHERE a.local = :local"),
     @NamedQuery(name = "Arquivos.findByMetadata", query = "SELECT a FROM Arquivos a WHERE a.metadata = :metadata")})
 public class Arquivos implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Basic(optional = false)
     @NotNull
-    @Column(nullable = false)
+    @Column(nullable = false, name = "id")
     private Long id;
     @Size(max = 300)
-    @Column(length = 300)
-    private String hash;
+    @Column(length = 300, name = "hashfile")
+    private String hashfile;
     @Size(max = 1024)
-    @Column(length = 1024)
+    @Column(length = 1024, name = "local")
     private String local;
     @Size(max = 2048)
-    @Column(length = 2048)
+    @Column(length = 2048, name = "metadata")
     private String metadata;
 
     public Arquivos() {
@@ -61,12 +64,12 @@ public class Arquivos implements Serializable {
         this.id = id;
     }
 
-    public String getHash() {
-        return hash;
+    public String getHashFile() {
+        return hashfile;
     }
 
-    public void setHash(String hash) {
-        this.hash = hash;
+    public void setHashFile(String hash) {
+        this.hashfile = hash;
     }
 
     public String getLocal() {

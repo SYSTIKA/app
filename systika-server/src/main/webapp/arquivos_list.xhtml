@@ -36,7 +36,7 @@
 				<p:column sortBy="#{bean.hash}">
 					<f:facet name="header">#{messages['arquivos.label.hash']}</f:facet>
 					<h:commandLink action="#{arquivosListMB.getNextView}" actionListener="#{arquivosListMB.clear}">
-						<h:outputText value="#{bean.hash}" />
+						<h:outputText value="#{bean.hashFile}" />
 						<f:param name="id" value="#{bean.id}" />
 					</h:commandLink>
 				</p:column>
