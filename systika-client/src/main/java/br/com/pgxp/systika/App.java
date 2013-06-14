@@ -1,6 +1,10 @@
 package br.com.pgxp.systika;
 
-import com.sun.org.apache.bcel.internal.generic.InstructionConstants;
+import br.com.pgxp.systika.dao.ArquivoJpaController;
+import br.com.pgxp.systika.dao.MetadadosJpaController;
+import br.com.pgxp.systika.dao.exceptions.PreexistingEntityException;
+import br.com.pgxp.systika.domain.Arquivo;
+import br.com.pgxp.systika.domain.Metadados;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,63 +12,71 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import javax.ws.rs.core.MediaType;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientRequestFactory;
-import org.jboss.resteasy.client.ClientResponse;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-import sun.misc.Cleaner;
 
 /**
  * Hello world!
  *
  */
 public class App {
+    
+   private static int NUM_OF_TASKS = 48;
 
+   public App() {}
+
+//   public void run() {
+//      long begTest = new java.util.Date().getTime();
+//
+//      List< Future > futuresList = new ArrayList< Future >();
+//      int nrOfProcessors = Runtime.getRuntime().availableProcessors();
+//      ExecutorService eservice = Executors.newFixedThreadPool(nrOfProcessors);
+//
+//      for(int index = 0; index < NUM_OF_TASKS; index++)
+//         futuresList.add(eservice.submit(new Task(index)));
+//
+//         Object taskResult;
+//         for(Future future:futuresList) {
+//            try {
+//               taskResult = future.get();
+//               System.out.println("result "+taskResult);
+//         }
+//         catch (InterruptedException e) {}
+//         catch (ExecutionException e) {}
+//      }
+//      Double secs = new Double((new java.util.Date().getTime() - begTest)*0.001);
+//      System.out.println("run time " + secs + " secs");
+//    }
+
+
+    static ArquivoJpaController ajc = new ArquivoJpaController();
+    static MetadadosJpaController mjc = new MetadadosJpaController();
 
     public static void main(final String[] args) throws IOException,
-                                                        SAXException, TikaException, Exception {
-        System.out.println("------------ Parsing");
-        String path = "http://localhost:8084/systika-server/rest/manutencao";
-        ClientRequestFactory factory = new ClientRequestFactory();
-        ClientRequest clientRequest = factory.createRequest(path+"/salvar/dasdasd"); 
-        
+            SAXException, TikaException, Exception {
+        System.out.println("------------ Parsing-----------------");
 
-//         NewJerseyClient client = new NewJerseyClient();
-//         
-//         System.out.println(client.carregar(Arquivos.class, "1", "asda").toString());
-         
+        List<File> fList = selecionaDir("/media/escritorio/backup/Users/Paulo");
 
-        File diretorio = new File("/media/escritorio/backup/Users/Paulo/Documents/san german");
-        File fList[] = diretorio.listFiles();
-
-        for (int i = 0; i < fList.length; i++) {
-        clientRequest.body(MediaType.APPLICATION_JSON, metadata(fList[i])); 
-        clientRequest.execute();
-         //client.salvar(metadata(fList[i]), "sdasd");
+        for (File file : fList) {
+            metadata(file);
         }
-
-        
-        //client.close();
-        
-      
-      ClientRequest cr = factory.createRequest(path+"/carregar/1/dasdasd");  
-      Arquivos resposta = cr.getTarget(Arquivos.class); 
-      System.out.println(resposta.getLocal());  
-        
     }
 
-    public static Arquivos metadata(File file) throws FileNotFoundException, IOException, SAXException, TikaException {
+    public static void metadata(File file) throws FileNotFoundException, IOException, SAXException, TikaException, PreexistingEntityException, Exception {
         InputStream input = new FileInputStream(file);
         ContentHandler handler = new DefaultHandler();
-        Arquivos arquivos = new Arquivos();
+        Arquivo arquivo = new Arquivo();
 
         Metadata metadata = new Metadata();
 
@@ -76,18 +88,49 @@ public class App {
 
         String[] metadataNames = metadata.names();
 
-        System.out.println(file);
+        arquivo.setLocal(file.getParent());
+        arquivo.setNome(file.getAbsoluteFile().getName());
+        arquivo.setTamanho(file.length());
+        arquivo.setDatamodificado(file.lastModified());
+        arquivo.setHashfile("" + file.hashCode());
+        ajc.create(arquivo);
 
-        arquivos.setLocal(file.getAbsolutePath());
-        arquivos.setHashFile(""+file.hashCode());
-        arquivos.setMetadata(metadataNames.toString());
         for (String name : metadataNames) {
-            
-            System.out.println(name + ": " + metadata.get(name));
+            if (metadata.get(name).length() <= 1023) {
+                Metadados metadados = new Metadados();
+                metadados.setMeta(name.trim() + ": " + metadata.get(name).trim());
+                metadados.setIdarquivo(arquivo.getId());
+                mjc.create(metadados);
+            } else{
+                System.out.println(file.getAbsoluteFile()+ ": " +name + ": " + metadata.get(name));
+            }
+
 
         }
+
+
         input.close();
-        return arquivos;
+        //return arquivo;
+
+    }
+
+    private static List<File> selecionaDir(String path) throws TikaException, IOException, SAXException {
+
+        List<File> lista = new ArrayList<File>();
+
+        File diretorio = new File(path);
+
+        for (File file : diretorio.listFiles()) {
+            if (file.isFile()) {
+                lista.add(file);
+            }
+            if (file.isDirectory()) {
+                lista.addAll(selecionaDir(file.getCanonicalPath()));
+            }
+
+        }
+
+        return lista;
 
     }
 }

@@ -1,0 +1,60 @@
+﻿SELECT * FROM metadados;
+select count(*) from arquivo;
+SELECT * FROM arquivo a, metadados m where idarquivo = a.id and meta like '%date%';
+SELECT seq_name, seq_count FROM sequence;
+
+
+--DROP TABLE arquivo;
+
+CREATE TABLE arquivo
+(
+  id bigint NOT NULL,
+  hashfile character varying(512),
+  local character varying(1024),
+  nome character varying(512),
+  dataModificado bigint,
+  tamanho bigint,
+  CONSTRAINT arquivo_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE arquivo
+  OWNER TO postgres;
+
+-- Index: idxhash
+
+--DROP INDEX idxhash;
+
+CREATE INDEX idxhash
+  ON arquivo
+  USING btree
+  (hashfile COLLATE pg_catalog."default");
+
+--DROP TABLE metadados;
+
+CREATE TABLE metadados
+(
+  id bigint NOT NULL,
+  idarquivo bigint,
+  meta character varying(1024),
+  CONSTRAINT metadados_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_metadados_idarquivo FOREIGN KEY (idarquivo)
+      REFERENCES arquivo (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE metadados
+  OWNER TO postgres;
+
+-- Index: idxmeta
+
+--DROP INDEX idxmeta;
+
+CREATE INDEX idxmeta
+  ON metadados
+  USING btree
+  (meta COLLATE pg_catalog."default");
+
