@@ -66,7 +66,7 @@ public class App {
             SAXException, TikaException, Exception {
         System.out.println("------------ Parsing-----------------");
 
-        List<File> fList = selecionaDir("/media/escritorio/backup/Users/Paulo");
+        List<File> fList = selecionaDir("C:\\Users\\Paulo\\Google Drive");
 
         for (File file : fList) {
             metadata(file);
